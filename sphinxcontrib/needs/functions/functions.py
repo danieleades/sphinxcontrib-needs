@@ -9,10 +9,11 @@ in need configurations.
 """
 
 import ast
-from docutils import nodes
 import re
-from sphinx.errors import SphinxError
 import sys
+
+from docutils import nodes
+from sphinx.errors import SphinxError
 
 from sphinxcontrib.needs.utils import NEEDS_FUNCTIONS
 
@@ -42,13 +43,12 @@ def register_func(need_function):
 
     # if func_name in env.needs_functions.keys():
     if func_name in NEEDS_FUNCTIONS.keys():
-        raise SphinxError('sphinx-needs: Function name {} already registered.'.format(func_name))
+        raise SphinxError(
+            "sphinx-needs: Function name {} already registered.".format(func_name)
+        )
 
     # env.needs_functions[func_name] = {
-    NEEDS_FUNCTIONS[func_name] = {
-        'name': func_name,
-        'function': need_function
-    }
+    NEEDS_FUNCTIONS[func_name] = {"name": func_name, "function": need_function}
 
 
 def execute_func(env, need, func_string):
@@ -64,26 +64,38 @@ def execute_func(env, need, func_string):
 
     # if func_name not in env.needs_functions.keys():
     if func_name not in NEEDS_FUNCTIONS.keys():
-        raise SphinxError('Unknown dynamic sphinx-needs function: {}. Found in need: {}'.format(func_name, need['id']))
+        raise SphinxError(
+            "Unknown dynamic sphinx-needs function: {}. Found in need: {}".format(
+                func_name, need["id"]
+            )
+        )
 
     # func = env.needs_functions[func_name]['function']
 
-    func = NEEDS_FUNCTIONS[func_name]['function']
+    func = NEEDS_FUNCTIONS[func_name]["function"]
     func_return = func(env, need, env.needs_all_needs, *func_args, **func_kwargs)
 
-    if not isinstance(func_return, (str, int, float, list, unicode)) and func_return is not None:
-        raise SphinxError('Return value of function {} is of type {}. Allowed are str, int, float'.format(
-            func_name, type(func_return)))
+    if (
+        not isinstance(func_return, (str, int, float, list, unicode))
+        and func_return is not None
+    ):
+        raise SphinxError(
+            "Return value of function {} is of type {}. Allowed are str, int, float".format(
+                func_name, type(func_return)
+            )
+        )
 
     if isinstance(func_return, list):
         for element in func_return:
             if not isinstance(element, (str, int, float, unicode)):
-                raise SphinxError('Element of return list of function {} is of type {}. '
-                                  'Allowed are str, int, float'.format(func_name, type(func_return)))
+                raise SphinxError(
+                    "Element of return list of function {} is of type {}. "
+                    "Allowed are str, int, float".format(func_name, type(func_return))
+                )
     return func_return
 
 
-func_pattern = re.compile(r'\[\[(.*?)\]\]')  # RegEx to detect function strings
+func_pattern = re.compile(r"\[\[(.*?)\]\]")  # RegEx to detect function strings
 
 
 def find_and_replace_node_content(node, env, need):
@@ -95,10 +107,14 @@ def find_and_replace_node_content(node, env, need):
     :return: None
     """
     new_children = []
-    if not node.children and isinstance(node, nodes.Text) or isinstance(node, nodes.reference):
+    if (
+        not node.children
+        and isinstance(node, nodes.Text)
+        or isinstance(node, nodes.reference)
+    ):
         if isinstance(node, nodes.reference):
             try:
-                new_text = node.attributes['refuri']
+                new_text = node.attributes["refuri"]
             except KeyError:
                 # If no refuri is set, we don't not need to modify anything.
                 # So stop here and return the untouched node.
@@ -108,18 +124,18 @@ def find_and_replace_node_content(node, env, need):
         func_match = func_pattern.findall(new_text)
         for func_string in func_match:
             if not is_python3:
-                func_string = func_string.encode('utf-8')
+                func_string = func_string.encode("utf-8")
             # sphinx is replacing ' and " with language specific quotation marks (up and down), which makes
             # it impossible for the later used AST render engine to detect a python function call in the given
             # string. Therefor a replacement is needed for the execution of the found string.
             func_string_org = func_string[:]
-            func_string = func_string.replace('„', '"')
-            func_string = func_string.replace('“', '"')
-            func_string = func_string.replace('”', '"')
-            func_string = func_string.replace('”', '"')
+            func_string = func_string.replace("„", '"')
+            func_string = func_string.replace("“", '"')
+            func_string = func_string.replace("”", '"')
+            func_string = func_string.replace("”", '"')
 
-            func_string = func_string.replace('‘', '\'')
-            func_string = func_string.replace('’', '\'')
+            func_string = func_string.replace("‘", "'")
+            func_string = func_string.replace("’", "'")
             func_return = execute_func(env, need, func_string)
 
             # This should never happen, but we can not be sure.
@@ -127,11 +143,15 @@ def find_and_replace_node_content(node, env, need):
                 func_return = ", ".join(func_return)
 
             if not is_python3:
-                new_text = new_text.replace(u'[[{}]]'.format(func_string_org.decode('utf-8')), func_return)
+                new_text = new_text.replace(
+                    u"[[{}]]".format(func_string_org.decode("utf-8")), func_return
+                )
             else:
-                new_text = new_text.replace(u'[[{}]]'.format(func_string_org), func_return)
+                new_text = new_text.replace(
+                    u"[[{}]]".format(func_string_org), func_return
+                )
         if isinstance(node, nodes.reference):
-            node.attributes['refuri'] = new_text
+            node.attributes["refuri"] = new_text
             # Call normal handling for children of reference node (will contain related Text node with link-text)
             for child in node.children:
                 new_child = find_and_replace_node_content(child, env, need)
@@ -163,36 +183,52 @@ def resolve_dynamic_values(env):
     :return: return value of given function
     """
     # Only perform calculation if not already done yet
-    if env.needs_workflow['dynamic_values_resolved']:
+    if env.needs_workflow["dynamic_values_resolved"]:
         return
 
     needs = env.needs_all_needs
     for key, need in needs.items():
         for need_option in need:
-            if need_option in ['docname', 'lineno', 'target_node', 'content', 'content_node']:
+            if need_option in [
+                "docname",
+                "lineno",
+                "target_node",
+                "content",
+                "content_node",
+            ]:
                 # dynamic values in this data are not allowed.
                 continue
             if not isinstance(need[need_option], (list, set)):
                 func_call = True
                 while func_call:
                     try:
-                        func_call, func_return = _detect_and_execute(need[need_option], need, env)
+                        func_call, func_return = _detect_and_execute(
+                            need[need_option], need, env
+                        )
                     except FunctionParsingException:
-                        raise SphinxError("Function definition of {option} in file {file}:{line} has "
-                                          "unsupported parameters. "
-                                          "supported are str, int/float, list".format(option=need_option,
-                                                                                      file=need['docname'],
-                                                                                      line=need['lineno']))
+                        raise SphinxError(
+                            "Function definition of {option} in file {file}:{line} has "
+                            "unsupported parameters. "
+                            "supported are str, int/float, list".format(
+                                option=need_option,
+                                file=need["docname"],
+                                line=need["lineno"],
+                            )
+                        )
 
                     if func_call is None:
                         continue
                     # Replace original function string with return value of function call
                     if func_return is None:
-                        need[need_option] = need[need_option].replace('[[{}]]'.format(func_call), '')
+                        need[need_option] = need[need_option].replace(
+                            "[[{}]]".format(func_call), ""
+                        )
                     else:
-                        need[need_option] = need[need_option].replace('[[{}]]'.format(func_call), str(func_return))
+                        need[need_option] = need[need_option].replace(
+                            "[[{}]]".format(func_call), str(func_return)
+                        )
 
-                    if need[need_option] == '':
+                    if need[need_option] == "":
                         need[need_option] = None
             else:
                 new_values = []
@@ -200,17 +236,25 @@ def resolve_dynamic_values(env):
                     try:
                         func_call, func_return = _detect_and_execute(element, need, env)
                     except FunctionParsingException:
-                        raise SphinxError("Function definition of {option} in file {file}:{line} has "
-                                          "unsupported parameters. "
-                                          "supported are str, int/float, list".format(option=need_option,
-                                                                                      file=need['docname'],
-                                                                                      line=need['lineno']))
+                        raise SphinxError(
+                            "Function definition of {option} in file {file}:{line} has "
+                            "unsupported parameters. "
+                            "supported are str, int/float, list".format(
+                                option=need_option,
+                                file=need["docname"],
+                                line=need["lineno"],
+                            )
+                        )
                     if func_call is None:
                         new_values.append(element)
                     else:
                         # Replace original function string with return value of function call
                         if isinstance(need[need_option], (str, int, float)):
-                            new_values.append(element.replace('[[{}]]'.format(func_call), str(func_return)))
+                            new_values.append(
+                                element.replace(
+                                    "[[{}]]".format(func_call), str(func_return)
+                                )
+                            )
                         else:
                             if isinstance(need[need_option], (list, set)):
                                 if isinstance(func_return, (list, set)):
@@ -221,7 +265,7 @@ def resolve_dynamic_values(env):
                 need[need_option] = new_values
 
     # Finally set a flag so that this function gets not executed several times
-    env.needs_workflow['dynamic_values_resolved'] = True
+    env.needs_workflow["dynamic_values_resolved"] = True
 
 
 def check_and_get_content(content, need, env):
@@ -239,17 +283,19 @@ def check_and_get_content(content, need, env):
     try:
         content = str(content)
     except UnicodeEncodeError:
-        content = content.encode('utf-8')
+        content = content.encode("utf-8")
 
     func_match = func_pattern.search(content)
     if func_match is None:
         return content
 
     func_call = func_match.group(1)  # Extract function call
-    func_return = execute_func(env, need, func_call)  # Execute function call and get return value
+    func_return = execute_func(
+        env, need, func_call
+    )  # Execute function call and get return value
 
     # Replace the function_call with the calculated value
-    content = content.replace('[[{}]]'.format(func_call), func_return)
+    content = content.replace("[[{}]]".format(func_call), func_return)
     return content
 
 
@@ -257,14 +303,16 @@ def _detect_and_execute(content, need, env):
     try:
         content = str(content)
     except UnicodeEncodeError:
-        content = content.encode('utf-8')
+        content = content.encode("utf-8")
 
     func_match = func_pattern.search(content)
     if func_match is None:
         return None, None
 
     func_call = func_match.group(1)  # Extract function call
-    func_return = execute_func(env, need, func_call)  # Execute function call and get return value
+    func_return = execute_func(
+        env, need, func_call
+    )  # Execute function call and get return value
 
     return func_call, func_return
 
@@ -285,13 +333,21 @@ def _analyze_func_string(func_string, need):
     try:
         func = ast.parse(func_string)
     except SyntaxError as e:
-        need_id = need['id'] if need is not None else 'UNKNOWN'
-        raise SphinxError('Parsing function string failed for need {}: {}. {}'.format(need_id, func_string, e))
+        need_id = need["id"] if need is not None else "UNKNOWN"
+        raise SphinxError(
+            "Parsing function string failed for need {}: {}. {}".format(
+                need_id, func_string, e
+            )
+        )
     try:
         func_call = func.body[0].value
         func_name = func_call.func.id
     except AttributeError:
-        raise SphinxError("Given dynamic function string is not a valid python call. Got: {}".format(func_string))
+        raise SphinxError(
+            "Given dynamic function string is not a valid python call. Got: {}".format(
+                func_string
+            )
+        )
 
     func_args = []
     for arg in func_call.args:
@@ -310,20 +366,22 @@ def _analyze_func_string(func_string, need):
                     arg_list.append(element.s)
             func_args.append(arg_list)
         elif isinstance(arg, ast.Attribute):
-            if arg.value.id == 'need' and need is not None:
+            if arg.value.id == "need" and need is not None:
                 func_args.append(need[arg.attr])
             else:
-                raise FunctionParsingException('usage of need attribute not supported.')
+                raise FunctionParsingException("usage of need attribute not supported.")
         elif isinstance(arg, ast.NameConstant):
             if isinstance(arg.value, bool):
                 func_args.append(arg.value)
             else:
                 raise FunctionParsingException(
-                    'Unsupported type found in function definition. Supported are numbers, strings, bool and list')
+                    "Unsupported type found in function definition. Supported are numbers, strings, bool and list"
+                )
         else:
             raise FunctionParsingException(
-                'Unsupported type found in function definition: {}. '
-                'Supported are numbers, strings, bool and list'.format(func_string))
+                "Unsupported type found in function definition: {}. "
+                "Supported are numbers, strings, bool and list".format(func_string)
+            )
     func_kargs = {}
     for keyword in func_call.keywords:
         kvalue = keyword.value

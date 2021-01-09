@@ -1,10 +1,9 @@
 import os
-from sphinx.util.osutil import copyfile
-from sphinx.util.osutil import ensuredir
-from sphinx.util.console import brown
 
 import sphinx
 from pkg_resources import parse_version
+from sphinx.util.console import brown
+from sphinx.util.osutil import copyfile, ensuredir
 
 from sphinxcontrib.needs.utils import logger
 
@@ -13,7 +12,7 @@ if parse_version(sphinx_version) >= parse_version("1.6"):
     from sphinx.util import status_iterator  # NOQA Sphinx 1.5
 
 
-IMAGE_DIR_NAME = '_static'
+IMAGE_DIR_NAME = "_static"
 
 
 def safe_add_file(filename, app):
@@ -30,15 +29,23 @@ def safe_add_file(filename, app):
     static_data_file = os.path.join("_static", data_file)
 
     if data_file.split(".")[-1] == "js":
-        if hasattr(app.builder, "script_files") and static_data_file not in app.builder.script_files:
+        if (
+            hasattr(app.builder, "script_files")
+            and static_data_file not in app.builder.script_files
+        ):
             # app.add_javascript(data_file)
             app.add_js_file(data_file)
     elif data_file.split(".")[-1] == "css":
-        if hasattr(app.builder, "css_files") and static_data_file not in app.builder.css_files:
+        if (
+            hasattr(app.builder, "css_files")
+            and static_data_file not in app.builder.css_files
+        ):
             # app.add_stylesheet(data_file)
             app.add_css_file(data_file)
     else:
-        raise NotImplementedError("File type {} not support by save_add_file".format(data_file.split(".")[-1]))
+        raise NotImplementedError(
+            "File type {} not support by save_add_file".format(data_file.split(".")[-1])
+        )
 
 
 def safe_remove_file(filename, app):
@@ -55,10 +62,16 @@ def safe_remove_file(filename, app):
     static_data_file = os.path.join("_static", data_file)
 
     if data_file.split(".")[-1] == "js":
-        if hasattr(app.builder, "script_files") and static_data_file in app.builder.script_files:
+        if (
+            hasattr(app.builder, "script_files")
+            and static_data_file in app.builder.script_files
+        ):
             app.builder.script_files.remove(static_data_file)
     elif data_file.split(".")[-1] == "css":
-        if hasattr(app.builder, "css_files") and static_data_file in app.builder.css_files:
+        if (
+            hasattr(app.builder, "css_files")
+            and static_data_file in app.builder.css_files
+        ):
             app.builder.css_files.remove(static_data_file)
 
 
@@ -66,21 +79,21 @@ def safe_remove_file(filename, app):
 # https://github.com/spinus/sphinxcontrib-images/blob/master/sphinxcontrib/images.py#L203
 def install_styles_static_files(app, env):
     STATICS_DIR_PATH = os.path.join(app.builder.outdir, IMAGE_DIR_NAME)
-    dest_path = os.path.join(STATICS_DIR_PATH, 'sphinx-needs')
+    dest_path = os.path.join(STATICS_DIR_PATH, "sphinx-needs")
 
     files_to_copy = ["common.css"]
 
-    if app.config.needs_css == 'modern.css':
+    if app.config.needs_css == "modern.css":
         source_folder = os.path.join(os.path.dirname(__file__), "css/modern/")
         for root, dirs, files in os.walk(source_folder):
             for single_file in files:
                 files_to_copy.append(os.path.join(root, single_file))
-    elif app.config.needs_css == 'dark.css':
+    elif app.config.needs_css == "dark.css":
         source_folder = os.path.join(os.path.dirname(__file__), "css/dark/")
         for root, dirs, files in os.walk(source_folder):
             for single_file in files:
                 files_to_copy.append(os.path.join(root, single_file))
-    elif app.config.needs_css == 'blank.css':
+    elif app.config.needs_css == "blank.css":
         source_folder = os.path.join(os.path.dirname(__file__), "css/blank/")
         for root, dirs, files in os.walk(source_folder):
             for single_file in files:
@@ -99,16 +112,26 @@ def install_styles_static_files(app, env):
         status_iterator = app.status_iterator
 
     for source_file_path in status_iterator(
-            files_to_copy,
-            'Copying static files for sphinx-needs custom style support...',
-            brown, len(files_to_copy)):
+        files_to_copy,
+        "Copying static files for sphinx-needs custom style support...",
+        brown,
+        len(files_to_copy),
+    ):
 
         if not os.path.isabs(source_file_path):
-            source_file_path = os.path.join(os.path.dirname(__file__), "css", source_file_path)
+            source_file_path = os.path.join(
+                os.path.dirname(__file__), "css", source_file_path
+            )
 
         if not os.path.exists(source_file_path):
-            source_file_path = os.path.join(os.path.dirname(__file__), "css", "blank", "blank.css")
-            logger.warning("{0} not found. Copying sphinx-internal blank.css".format(source_file_path))
+            source_file_path = os.path.join(
+                os.path.dirname(__file__), "css", "blank", "blank.css"
+            )
+            logger.warning(
+                "{0} not found. Copying sphinx-internal blank.css".format(
+                    source_file_path
+                )
+            )
 
         dest_file_path = os.path.join(dest_path, os.path.basename(source_file_path))
 
@@ -122,7 +145,7 @@ def install_styles_static_files(app, env):
 
 def install_datatables_static_files(app, env):
     STATICS_DIR_PATH = os.path.join(app.builder.outdir, IMAGE_DIR_NAME)
-    dest_path = os.path.join(STATICS_DIR_PATH, 'sphinx-needs/libs/html')
+    dest_path = os.path.join(STATICS_DIR_PATH, "sphinx-needs/libs/html")
 
     source_folder = os.path.join(os.path.dirname(__file__), "libs/html")
     files_to_copy = []
@@ -136,9 +159,11 @@ def install_datatables_static_files(app, env):
         status_iterator = app.status_iterator
 
     for source_file_path in status_iterator(
-            files_to_copy,
-            'Copying static files for sphinx-needs datatables support...',
-            brown, len(files_to_copy)):
+        files_to_copy,
+        "Copying static files for sphinx-needs datatables support...",
+        brown,
+        len(files_to_copy),
+    ):
 
         if not os.path.isabs(source_file_path):
             raise IOError("Path must be absolute. Got: {}".format(source_file_path))
@@ -146,7 +171,9 @@ def install_datatables_static_files(app, env):
         if not os.path.exists(source_file_path):
             raise IOError("File not found: {}".format(source_file_path))
 
-        dest_file_path = os.path.join(dest_path, os.path.relpath(source_file_path, source_folder))
+        dest_file_path = os.path.join(
+            dest_path, os.path.relpath(source_file_path, source_folder)
+        )
 
         if not os.path.exists(os.path.dirname(dest_file_path)):
             ensuredir(os.path.dirname(dest_file_path))
@@ -161,7 +188,7 @@ def install_datatables_static_files(app, env):
 
 def install_collapse_static_files(app, env):
     STATICS_DIR_PATH = os.path.join(app.builder.outdir, IMAGE_DIR_NAME)
-    dest_path = os.path.join(STATICS_DIR_PATH, 'sphinx-needs')
+    dest_path = os.path.join(STATICS_DIR_PATH, "sphinx-needs")
 
     source_folder = os.path.join(os.path.dirname(__file__), "libs/html")
     files_to_copy = [os.path.join(source_folder, "sphinx_needs_collapse.js")]
@@ -171,9 +198,11 @@ def install_collapse_static_files(app, env):
         status_iterator = app.status_iterator
 
     for source_file_path in status_iterator(
-            files_to_copy,
-            'Copying static files for sphinx-needs collapse support...',
-            brown, len(files_to_copy)):
+        files_to_copy,
+        "Copying static files for sphinx-needs collapse support...",
+        brown,
+        len(files_to_copy),
+    ):
 
         if not os.path.isabs(source_file_path):
             raise IOError("Path must be absolute. Got: {}".format(source_file_path))
@@ -181,7 +210,9 @@ def install_collapse_static_files(app, env):
         if not os.path.exists(source_file_path):
             raise IOError("File not found: {}".format(source_file_path))
 
-        dest_file_path = os.path.join(dest_path, os.path.relpath(source_file_path, source_folder))
+        dest_file_path = os.path.join(
+            dest_path, os.path.relpath(source_file_path, source_folder)
+        )
 
         if not os.path.exists(os.path.dirname(dest_file_path)):
             ensuredir(os.path.dirname(dest_file_path))

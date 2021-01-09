@@ -2,8 +2,9 @@
 Cares about handling and execution warnings.
 
 """
-from pkg_resources import parse_version
 import sphinx
+from pkg_resources import parse_version
+
 from sphinxcontrib.needs.filter_common import filter_needs
 
 sphinx_version = sphinx.__version__
@@ -46,21 +47,27 @@ def process_warnings(app, exception):
 
     needs = env.needs_all_needs
 
-    warnings = getattr(app.config, 'needs_warnings', {})
+    warnings = getattr(app.config, "needs_warnings", {})
 
     with logging.pending_logging():
-        logger.info('\nChecking sphinx-needs warnings')
+        logger.info("\nChecking sphinx-needs warnings")
         warning_raised = False
         for warning_name, warning_filter in warnings.items():
             result = filter_needs(needs.values(), warning_filter)
             if len(result) == 0:
-                logger.info('  {}: passed'.format(warning_name))
+                logger.info("  {}: passed".format(warning_name))
             else:
-                need_ids = [x['id'] for x in result]
-                logger.info('  {}: failed'.format(warning_name))
-                logger.info('  \t\tfailed needs: {} ({})'.format(len(need_ids), ', '.join(need_ids)))
-                logger.info('  \t\tused filter: {}'.format(warning_filter))
+                need_ids = [x["id"] for x in result]
+                logger.info("  {}: failed".format(warning_name))
+                logger.info(
+                    "  \t\tfailed needs: {} ({})".format(
+                        len(need_ids), ", ".join(need_ids)
+                    )
+                )
+                logger.info("  \t\tused filter: {}".format(warning_filter))
                 warning_raised = True
 
         if warning_raised:
-            logger.warning('Sphinx-Needs warnings were raised. See console / log output for details.')
+            logger.warning(
+                "Sphinx-Needs warnings were raised. See console / log output for details."
+            )

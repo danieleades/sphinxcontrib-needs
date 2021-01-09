@@ -1,7 +1,9 @@
-from sphinx.builders import Builder
-from sphinxcontrib.needs.utils import NeedsList
 import sphinx
 from pkg_resources import parse_version
+from sphinx.builders import Builder
+
+from sphinxcontrib.needs.utils import NeedsList
+
 sphinx_version = sphinx.__version__
 if parse_version(sphinx_version) >= parse_version("1.6"):
     from sphinx.util import logging
@@ -10,9 +12,9 @@ else:
 
 
 class NeedsBuilder(Builder):
-    name = 'needs'
-    format = 'json'
-    file_suffix = '.txt'
+    name = "needs"
+    format = "json"
+    file_suffix = ".txt"
     links_suffix = None
 
     def write_doc(self, docname, doctree):
@@ -37,7 +39,7 @@ class NeedsBuilder(Builder):
             needs_list.add_need(version, need)
 
         for key, need_filter in filters.items():
-            if need_filter['export_id']:
+            if need_filter["export_id"]:
                 needs_list.add_filter(version, need_filter)
 
         try:
