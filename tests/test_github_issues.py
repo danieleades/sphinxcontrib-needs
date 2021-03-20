@@ -2,7 +2,11 @@ import re
 from pathlib import Path
 from subprocess import STDOUT, check_output
 
+from nose.tools import raises
+from sphinx.application import Sphinx
+from sphinx.errors import ConfigError
 from sphinx_testing import with_app
+
 
 # @with_app(buildername='html', srcdir='doc_test/doc_github_issue_21')
 # def test_doc_github_21(app, status, warning):
@@ -65,3 +69,9 @@ def test_doc_github_160(app, status, warning):
     app.build()
     html = Path(app.outdir, 'index.html').read_text()
     assert '<a class="reference internal" href="#A-001" title="A-002">A-001</a>' in html
+
+
+@raises(ConfigError)
+@with_app(buildername='html', srcdir='doc_test/doc_github_issue_151')
+def test_doc_github_151(app: Sphinx, status, warning):
+    app.build()
