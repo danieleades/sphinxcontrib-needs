@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.application import Sphinx
@@ -431,8 +433,8 @@ def check_configuration(_app: Sphinx, config: Config):
     :param config:
     :return:
     """
-    extra_options = config["needs_extra_options"]
-    link_types = [x["option"] for x in config["needs_extra_links"]]
+    extra_options: Dict[str, Any] = config["needs_extra_options"]  # type: ignore
+    link_types = [x["option"] for x in config["needs_extra_links"]]  # type: ignore
 
     # Check for usage of internal names
     for internal in INTERNALS:

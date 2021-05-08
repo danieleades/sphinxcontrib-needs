@@ -1,26 +1,41 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-    - repo: https://github.com/psf/black
-      rev: 21.5b0
-      hooks:
-          - id: black
+  - repo: https://github.com/psf/black
+    rev: 21.5b0
+    hooks:
+      - id: black
 
-    - repo: https://github.com/pycqa/isort
-      rev: 5.8.0
-      hooks:
-          - id: isort
+  - repo: https://github.com/pycqa/isort
+    rev: 5.8.0
+    hooks:
+      - id: isort
 
-    - repo: https://github.com/PyCQA/flake8
-      rev: 3.9.1
-      hooks:
-          - id: flake8
-            additional_dependencies:
-                - pep8-naming
-                - flake8-bugbear
+  - repo: https://github.com/PyCQA/flake8
+    rev: 3.9.1
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - pep8-naming
+          - flake8-bugbear
 
-    - repo: https://github.com/asottile/pyupgrade
-      rev: v2.14.0
-      hooks:
-          - id: pyupgrade
-            args: [--py36-plus]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.14.0
+    hooks:
+      - id: pyupgrade
+        args: [--py36-plus]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.812
+    hooks:
+      - id: mypy
+        args:
+          - --follow-imports=skip
+          - --ignore-missing-imports
+        files: | # incremental 'fully-typed' list
+          (?x)^sphinxcontrib\/(
+              needs\/(
+                logging\.py|
+                needs\.py|
+              )|
+          )$
