@@ -4,6 +4,29 @@ table.need td {
     white-space: normal;
 }
 
+/* Needed for RTD theme.
+Manipulates it for EVERY table, so also none sphinx-needs tables
+Another solution would be to use JS, to address only divs, which have a sphinx-needs table as child.*/
+div.wy-table-responsive {
+    overflow: unset;
+    margin-bottom: unset;
+}
+ /* Bringing Head and content columns align*/
+ /*solution from https://datatables.net/forums/discussion/comment/72586/#Comment_72586*/
+/*table.dataTable,*/
+/*table.dataTable  thead th,*/
+/*table.dataTable tbody td {*/
+/*  -webkit-box-sizing: content-box;*/
+/*  -moz-box-sizing: content-box;*/
+/*  box-sizing: content-box;*/
+/*}*/
+
+table.NEEDS_TABLE {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
 /* We need not line-block margin:24 px here, which is coming from sphinx theme */
 table.need td div.needs_side.line-block{
     margin-bottom: 0;
@@ -48,6 +71,17 @@ div.need div.toggle div.line-block {
     margin-top: 0px;
     margin-left: 30px;
 }
+
+/* DEAD Links config */
+/* allowed dead links */
+span.needs_dead_link {
+    opacity: 0.8;
+}
+/*forbidden dead links */
+span.needs_dead_link.forbidden{
+    color: #dc3545;
+}
+
 
 /* Style configuration */
 

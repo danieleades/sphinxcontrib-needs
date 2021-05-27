@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # needs test docs documentation build configuration file, created by
 # sphinx-quickstart on Tue Mar 28 11:37:14 2017.
@@ -55,6 +54,7 @@ needs_extra_links = [
         "outgoing": "blocks",
         "copy": True,
         "style": "bold,#AA0000",
+        "allow_dead_links": True,
     },
     {
         "option": "tests",

@@ -37,6 +37,23 @@ def test(app, need, needs, *args, **kwargs):
     return "Test output of need {}. args: {}. kwargs: {}".format(need["id"], args, kwargs)
 
 
+def echo(app, need, needs, text, *args, **kwargs):
+    """
+    .. versionadded:: 0.6.3
+
+    Just returns the given string back.
+    Mostly useful for tests.
+
+    .. code-block:: jinja
+
+       A nice :need_func:`[[echo("first")]] test` for need_func.
+
+    **Result**: A nice :need_func:`[[echo("first")]] test` for need_func.
+
+    """
+    return text
+
+
 def copy(app, need, needs, option, need_id=None, lower=False, upper=False, filter=None):
     """
     Copies the value of one need option to another
@@ -277,7 +294,7 @@ def check_linked_values(app, need, needs, result, search_option, search_value, f
                 if not filter_single_need(needs[link], filter_string):
                     continue
             except Exception as e:
-                logger.warning("CheckLinkedValues: Filter {0} not valid: Error: {1}".format(filter_string, e))
+                logger.warning(f"CheckLinkedValues: Filter {filter_string} not valid: Error: {e}")
 
         if not one_hit and not needs[link][search_option] in search_value:
             return None
@@ -384,7 +401,7 @@ def calc_sum(app, need, needs, option, filter=None, links_only=False):
             except ValueError:
                 pass
             except NeedInvalidFilter as ex:
-                logger.warning("Given filter is not valid. Error: {}".format(ex))
+                logger.warning(f"Given filter is not valid. Error: {ex}")
         try:
             calculated_sum += float(check_need[option])
         except ValueError:

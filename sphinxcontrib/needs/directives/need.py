@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import hashlib
 import re
 
@@ -158,7 +157,9 @@ class NeedDirective(Directive):
 
     def make_hashed_id(self, type_prefix, id_length):
         hashable_content = self.full_title or "\n".join(self.content)
-        return "%s%s" % (type_prefix, hashlib.sha1(hashable_content.encode("UTF-8")).hexdigest().upper()[:id_length])
+        return "{}{}".format(
+            type_prefix, hashlib.sha1(hashable_content.encode("UTF-8")).hexdigest().upper()[:id_length]
+        )
 
     @property
     def env(self):
@@ -305,6 +306,9 @@ def process_need_nodes(app, doctree, fromdocname):
     # Call dynamic functions and replace related note data with their return values
     resolve_dynamic_values(env)
 
+    # check if we have dead links
+    check_links(env)
+
     # Create back links of common links and extra links
     for links in env.config.needs_extra_links:
         create_back_links(env, links["option"])
@@ -322,6 +326,32 @@ def process_need_nodes(app, doctree, fromdocname):
         build_need(layout, node_need, app)
 
 
+def check_links(env):
+    """
+    Checks if set links are valid or are dead (referenced need does not exist.)
+    :param env: Sphinx environment
+    :return:
+    """
+    needs = env.needs_all_needs
+    extra_links = getattr(env.config, "needs_extra_links", [])
+    for need in needs.values():
+        for link_type in extra_links:
+            dead_links_allowed = link_type.get("allow_dead_links", False)
+            for link in need[link_type["option"]]:
+                if "." in link:
+                    need_id, need_part_id = link.split(".")
+                else:
+                    need_id = link
+                    need_part_id = None
+                if need_id not in needs or (
+                    need_id in needs and need_part_id and need_part_id not in needs[need_id]["parts"]
+                ):
+                    need["has_dead_links"] = True
+                    if not dead_links_allowed:
+                        need["has_forbidden_dead_links"] = True
+                    break  # One found dead link is enough
+
+
 def create_back_links(env, option):
     """
     Create back-links in all found needs.
@@ -331,8 +361,8 @@ def create_back_links(env, option):
     :param env: sphinx enviroment
     :return: None
     """
-    option_back = "{}_back".format(option)
-    if env.needs_workflow["backlink_creation_{}".format(option)]:
+    option_back = f"{option}_back"
+    if env.needs_workflow[f"backlink_creation_{option}"]:
         return
 
     needs = env.needs_all_needs
@@ -355,7 +385,7 @@ def create_back_links(env, option):
                             needs[link_main]["parts"][link_part][option_back] = []
                         needs[link_main]["parts"][link_part][option_back].append(key)
 
-    env.needs_workflow["backlink_creation_{}".format(option)] = True
+    env.needs_workflow[f"backlink_creation_{option}"] = True
 
 
 def _fix_list_dyn_func(list):

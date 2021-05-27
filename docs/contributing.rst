@@ -83,6 +83,17 @@ Running Tests
 Linting
 -------
 
+This project uses `Pre-Commit <https://pre-commit.com/>`_ for linting. This will also apply formatting using `black <https://github.com/psf/black>`_ and
+`isort <https://pycqa.github.io/isort/>`_
+
+1. install pre-commit hooks (this only needs to be done once)
+
+::
+
+   poetry run pre-commit install
+
+2. run/apply lints
+
 ::
 
    make lint
@@ -123,15 +134,6 @@ and the local :download:`noxfile <../noxfile.py>`.
 
    .. literalinclude:: ../noxfile.py
 
-Formatting
-----------
-``Sphinx-Needs`` uses `black <https://github.com/psf/black>`_ and
-`isort <https://pycqa.github.io/isort/>`_ to care about its source code formatting.
-
-To run both::
-
-    make format
-
 
 Running Commands
 ----------------
@@ -140,3 +142,7 @@ See the Poetry documentation for a list of commands.
 
 In order to run custom commands inside the isolated environment, they
 should be prefixed with “poetry run” (ie. ``poetry run <command>``).
+
+
+.. Include our contributors and maintainers.
+.. include:: ../AUTHORS

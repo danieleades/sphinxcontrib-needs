@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.application import Sphinx
@@ -73,6 +71,7 @@ from sphinxcontrib.needs.environment import (
 from sphinxcontrib.needs.functions import needs_common_functions, register_func
 from sphinxcontrib.needs.logging import get_logger
 from sphinxcontrib.needs.roles.need_count import NeedCount, process_need_count
+from sphinxcontrib.needs.roles.need_func import NeedFunc, process_need_func
 from sphinxcontrib.needs.roles.need_incoming import NeedIncoming, process_need_incoming
 from sphinxcontrib.needs.roles.need_outgoing import NeedOutgoing, process_need_outgoing
 from sphinxcontrib.needs.roles.need_part import NeedPart, process_need_part
@@ -121,7 +120,7 @@ def setup(app):
     app.add_config_value("needs_id_required", False, "html", types=[bool])
     app.add_config_value(
         "needs_id_regex",
-        "^[A-Z0-9_]{{{id_length},}}".format(id_length=app.config.needs_id_length),
+        f"^[A-Z0-9_]{{{app.config.needs_id_length},}}",
         "html",
     )
     app.add_config_value("needs_show_link_type", False, "html", types=[bool])
@@ -130,7 +129,7 @@ def setup(app):
     app.add_config_value("needs_table_columns", "ID;TITLE;STATUS;TYPE;OUTGOING;TAGS", "html")
     app.add_config_value("needs_table_style", "DATATABLES", "html")
 
-    app.add_config_value("needs_role_need_template", u"{title} ({id})", "html")
+    app.add_config_value("needs_role_need_template", "{title} ({id})", "html")
     app.add_config_value("needs_role_need_max_title_length", 30, "html", types=[int])
 
     app.add_config_value("needs_extra_options", {}, "html")
@@ -164,7 +163,7 @@ def setup(app):
     app.add_config_value("needs_css", "modern.css", "html")
 
     # Prefix for need_part output in tables
-    app.add_config_value("needs_part_prefix", u"\u2192\u00a0", "html")
+    app.add_config_value("needs_part_prefix", "\u2192\u00a0", "html")
 
     # List of additional links, which can be used by setting related option
     # Values needed for each new link:
@@ -240,6 +239,8 @@ def setup(app):
 
     app.add_role("need_count", XRefRole(nodeclass=NeedCount, innernodeclass=nodes.inline, warn_dangling=True))
 
+    app.add_role("need_func", XRefRole(nodeclass=NeedFunc, innernodeclass=nodes.inline, warn_dangling=True))
+
     ########################################################################
     # EVENTS
     ########################################################################
@@ -272,6 +273,7 @@ def setup(app):
     app.connect("doctree-resolved", process_need_incoming)
     app.connect("doctree-resolved", process_need_outgoing)
     app.connect("doctree-resolved", process_need_count)
+    app.connect("doctree-resolved", process_need_func)
     app.connect("build-finished", process_warnings)
     app.connect("env-updated", install_lib_static_files)
 
@@ -368,7 +370,7 @@ def prepare_env(app, env, _docname):
         register_func(needs_func)
 
     # Own extra options
-    for option in ["hidden", "duration", "completion"]:
+    for option in ["hidden", "duration", "completion", "has_dead_links", "has_forbidden_dead_links"]:
         # Check if not already set by user
         if option not in app.config.needs_extra_options.keys():
             app.config.needs_extra_options[option] = directives.unchanged
